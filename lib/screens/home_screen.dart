@@ -27,6 +27,13 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: _lista.length,
         itemBuilder: (context, position) {
           return ListTile(
+            leading: _lista[position].image != null
+                ? CircleAvatar(
+                    child: ClipOval(
+                      child: Image.file(_lista[position].image!),
+                    ),
+                  )
+                : const SizedBox(),
             title: Text(_lista[position].texto),
             onTap: () {
               setState(() {

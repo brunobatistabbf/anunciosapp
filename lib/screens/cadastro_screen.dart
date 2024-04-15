@@ -6,9 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CadastroScreen extends StatefulWidget {
-  final Todo? task; // Adicione esta linha para receber a tarefa
+  final Todo? task;
 
-  // Adicione este construtor para receber a tarefa
   CadastroScreen({Key? key, this.task}) : super(key: key);
 
   @override
@@ -23,7 +22,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
   @override
   void initState() {
     super.initState();
-    // Preencha o campo de texto com a descrição da tarefa, se existir
     if (widget.task != null) {
       setState(() {
         _textController.text = widget.task!.texto;
