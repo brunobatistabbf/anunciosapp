@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:anunciosapp/file_persistence.dart';
 import 'package:anunciosapp/models/todo.dart';
 import 'package:anunciosapp/screens/cadastro_screen.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +13,21 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Todo> _lista = [];
+  List<Todo> _lista = List.empty(growable: true);
+
+  FilePersistence filePersistence = FilePersistence();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    filePersistence.getData().then((value) {
+      setState(() {
+        if (value != null) {
+          _lista = value;
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
               if (editedTask != null) {
                 setState(() {
                   _lista[position] = editedTask;
+                  filePersistence.saveData(_lista);
                 });
               }
             },
@@ -64,6 +82,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 MaterialPageRoute(builder: (context) => CadastroScreen()));
             setState(() {
               _lista.add(newTask);
+              filePersistence.saveData(_lista);
+
+              final snackBar = SnackBar(
+                content: Text('Anúncio criado com sucesso!!!'),
+                backgroundColor: Colors.green,
+              );
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
             });
           } catch (error) {
             print("Error: ${error.toString()}");
