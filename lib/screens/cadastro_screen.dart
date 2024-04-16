@@ -23,10 +23,8 @@ class _CadastroScreenState extends State<CadastroScreen> {
   void initState() {
     super.initState();
     if (widget.task != null) {
-      setState(() {
-        _textController.text = widget.task!.texto;
-        _image = widget.task!.image;
-      });
+      _textController.text = widget.task!.texto;
+      _image = widget.task!.image;
     }
   }
 
