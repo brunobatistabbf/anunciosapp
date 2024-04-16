@@ -4,6 +4,7 @@ import 'package:anunciosapp/models/todo.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CadastroScreen extends StatefulWidget {
   final Todo? task;
@@ -106,12 +107,24 @@ class _CadastroScreenState extends State<CadastroScreen> {
                           style: ElevatedButton.styleFrom(
                             primary: Colors.green,
                           ),
-                          onPressed: () {
+                          onPressed: () async {
                             FocusScope.of(context).unfocus();
                             if (_formkey.currentState!.validate()) {
                               Todo newTask = Todo(
                                   _textController.text, _image ?? File(''));
                               Navigator.pop(context, newTask);
+                              final Uri params = Uri(
+                                  scheme: 'mailto',
+                                  path: 'controle_comercial@anunciosapp.com',
+                                  queryParameters: {
+                                    "subjects": "Novo Anúncio",
+                                    "body":
+                                        "Um novo anúncio foi cadastrado no aplicativo "
+                                  });
+                              final url = params.toString();
+                              if (!await launch(url)) {
+                                throw 'Could not launch $url';
+                              }
                             }
                           },
                         ),
