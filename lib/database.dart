@@ -1,3 +1,4 @@
+import 'package:anunciosapp/models/todo.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:anunciosapp/helpers/task_helper.dart';
@@ -41,5 +42,33 @@ class DatabaseHelper {
       await db.execute("DROP TABLE ${TaskHelper.tableName};");
       await _onCreateDB(db, newVersion);
     }
+  }
+
+  Future<Todo?> saveTask(Todo task) async {
+    Database? db = await DatabaseHelper().db;
+    if (db != null) {
+      task.id = await db.insert(TaskHelper.tableName, task.toMap());
+      return task;
+    }
+    return null;
+  }
+
+  Future<List<Todo>?> getAll() async {
+    Database? db = await DatabaseHelper().db;
+    if (db == null) return null;
+
+    List<Map> returnedTasks = await db.query(TaskHelper.tableName, columns: [
+      TaskHelper.idColumn,
+      TaskHelper.textColumn,
+      TaskHelper.doneColumn,
+      TaskHelper.imagePathColumn
+    ]);
+
+    List<Todo> tasks = List.empty(growable: true);
+
+    for (Map task in returnedTasks) {
+      tasks.add(Todo.fromMap(task));
+    }
+    return tasks;
   }
 }
