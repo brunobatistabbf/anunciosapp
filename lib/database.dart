@@ -57,18 +57,66 @@ class DatabaseHelper {
     Database? db = await DatabaseHelper().db;
     if (db == null) return null;
 
-    List<Map> returnedTasks = await db.query(TaskHelper.tableName, columns: [
+    List<Map<String, dynamic>> returnedTasks =
+        await db.query(TaskHelper.tableName, columns: [
       TaskHelper.idColumn,
       TaskHelper.textColumn,
       TaskHelper.doneColumn,
       TaskHelper.imagePathColumn
     ]);
 
-    List<Todo> tasks = List.empty(growable: true);
+    List<Todo> tasks = [];
 
-    for (Map task in returnedTasks) {
-      tasks.add(Todo.fromMap(task));
+    for (Map<String, dynamic> taskMap in returnedTasks) {
+      tasks.add(Todo.fromMap(taskMap));
     }
     return tasks;
+  }
+
+  Future<Todo?> getById(int id) async {
+    Database? db = await DatabaseHelper().db;
+    if (db == null) return null;
+
+    List<Map<String, dynamic>> returnedTask = await db.query(
+      TaskHelper.tableName,
+      columns: [
+        TaskHelper.idColumn,
+        TaskHelper.textColumn,
+        TaskHelper.doneColumn,
+        TaskHelper.imagePathColumn
+      ],
+      where: "$TaskHelper.idColumn = ?",
+      whereArgs: [id],
+    );
+
+    if (returnedTask.isNotEmpty) {
+      Map<String, dynamic> taskMap = returnedTask.first;
+      if (taskMap.containsKey(TaskHelper.idColumn) &&
+          taskMap.containsKey(TaskHelper.textColumn) &&
+          taskMap.containsKey(TaskHelper.doneColumn) &&
+          taskMap.containsKey(TaskHelper.imagePathColumn)) {
+        return Todo.fromMap(taskMap);
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
+
+  Future<int?> editTask(Todo task) async {
+    Database? db = await DatabaseHelper().db;
+    if (db == null) return null;
+
+    return await db.update(TaskHelper.tableName, task.toMap(),
+        where: "$TaskHelper.idColumn = ?", whereArgs: [task.id]);
+  }
+
+  Future<int?> deleteTask(Todo task) async {
+    Database? db = await DatabaseHelper().db;
+    if (db == null) return null;
+
+    return await db.delete(TaskHelper.tableName,
+        where: "$TaskHelper.idColumn = ?", whereArgs: [task.id]);
   }
 }
