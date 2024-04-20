@@ -1,9 +1,11 @@
 import 'dart:io';
 
-import 'package:anunciosapp/file_persistence.dart';
-import 'package:anunciosapp/models/todo.dart';
-import 'package:anunciosapp/screens/cadastro_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:anunciosapp/models/todo.dart';
+import 'package:anunciosapp/database.dart';
+import 'package:anunciosapp/screens/cadastro_screen.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key? key}) : super(key: key);
@@ -13,20 +15,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Todo> _lista = List.empty(growable: true);
+  List<Todo> _lista = [];
 
-  FilePersistence filePersistence = FilePersistence();
+  DatabaseHelper _databaseHelper = DatabaseHelper();
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    filePersistence.getData().then((value) {
+  void initState() {
+    super.initState();
+    _getTasks();
+  }
+
+  void _getTasks() async {
+    List<Todo>? tasks = await _databaseHelper.getAll();
+    if (tasks != null) {
       setState(() {
-        if (value != null) {
-          _lista = value;
-        }
+        _lista = tasks;
       });
-    });
+    }
   }
 
   @override
@@ -59,15 +64,14 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             onLongPress: () async {
               Todo editedTask = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          CadastroScreen(task: _lista[position])));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CadastroScreen(task: _lista[position]),
+                ),
+              );
               if (editedTask != null) {
-                setState(() {
-                  _lista[position] = editedTask;
-                  filePersistence.saveData(_lista);
-                });
+                await _databaseHelper.editTask(editedTask);
+                _getTasks();
               }
             },
           );
@@ -77,21 +81,14 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Theme.of(context).primaryColor,
         child: const Icon(Icons.add),
         onPressed: () async {
-          try {
-            Todo newTask = await Navigator.push(context,
-                MaterialPageRoute(builder: (context) => CadastroScreen()));
-            setState(() {
-              _lista.add(newTask);
-              filePersistence.saveData(_lista);
+          Todo newTask = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CadastroScreen()),
+          );
 
-              final snackBar = SnackBar(
-                content: Text('Anúncio criado com sucesso!!!'),
-                backgroundColor: Colors.green,
-              );
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            });
-          } catch (error) {
-            print("Error: ${error.toString()}");
+          if (newTask != null) {
+            await _databaseHelper.saveTask(newTask);
+            _getTasks();
           }
         },
       ),

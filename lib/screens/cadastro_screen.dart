@@ -1,10 +1,8 @@
 import 'dart:io';
 
-import 'package:anunciosapp/models/todo.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:anunciosapp/models/todo.dart';
 
 class CadastroScreen extends StatefulWidget {
   final Todo? task;
@@ -44,22 +42,23 @@ class _CadastroScreenState extends State<CadastroScreen> {
         children: [
           GestureDetector(
             child: Container(
-                margin: EdgeInsets.symmetric(vertical: 20.0),
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  border: Border.all(width: 1, color: Colors.grey),
-                  shape: BoxShape.circle,
-                ),
-                child: _image == null
-                    ? const Icon(
-                        Icons.add_a_photo,
-                        size: 30,
-                      )
-                    : ClipOval(
-                        child: Image.file(_image!),
-                      )),
+              margin: EdgeInsets.symmetric(vertical: 20.0),
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                border: Border.all(width: 1, color: Colors.grey),
+                shape: BoxShape.circle,
+              ),
+              child: _image == null
+                  ? const Icon(
+                      Icons.add_a_photo,
+                      size: 30,
+                    )
+                  : ClipOval(
+                      child: Image.file(_image!),
+                    ),
+            ),
             onTap: () async {
               final ImagePicker _picker = ImagePicker();
               final XFile? pickedFile =
@@ -88,6 +87,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                       if (value!.isEmpty) {
                         return "Preenchimento Obrigatorio";
                       }
+                      return null;
                     },
                   ),
                 ),
@@ -110,21 +110,12 @@ class _CadastroScreenState extends State<CadastroScreen> {
                           onPressed: () async {
                             FocusScope.of(context).unfocus();
                             if (_formkey.currentState!.validate()) {
-                              Todo newTask = Todo(
-                                  _textController.text, _image ?? File(''));
-                              Navigator.pop(context, newTask);
-                              final Uri params = Uri(
-                                  scheme: 'mailto',
-                                  path: 'controle_comercial@anunciosapp.com',
-                                  queryParameters: {
-                                    "subjects": "Novo Anúncio",
-                                    "body":
-                                        "Um novo anúncio foi cadastrado no aplicativo "
-                                  });
-                              final url = params.toString();
-                              if (!await launch(url)) {
-                                throw 'Could not launch $url';
-                              }
+                              Navigator.pop(
+                                  context,
+                                  Todo(
+                                    _textController.text,
+                                    _image ?? File(''),
+                                  ));
                             }
                           },
                         ),
